@@ -8,13 +8,13 @@ Currently, it includes:
 
 - An activity checker which uses Habbo's API to report when a user last logged in
 
-- The ability to download user's avatars' (used for our weekly newsletter showcasing the Leadership team)
+- The ability to download user's avatars (used for our weekly newsletter showcasing the Leadership team)
 
 - The ability to open up the task completion pages for staff (DQ)
 
 - An inbuilt editor for names used in the aforementioned features
 
-Usernames are fetched from a file named `habbo-eedb-names` located in a folder named `.Habbo-Name-List` in the user's home directory (should work on Windows, Linux and Mac).
+Usernames are fetched from a file named `habbo-eedb-names.txt` located in a folder named `.Habbo-Name-List` in the user's home directory (should work on Windows, Linux and Mac).
 
 Images downloaded are sent to the same `.Habbo-Name-List` folder.
 
