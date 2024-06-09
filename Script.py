@@ -27,6 +27,9 @@ def mainMenu():  # Initial Menu
     checkDQ = Button(menuGUI, text='Quota Checker', command=lambda: openDQ(), width=40)
     checkDQ.grid(column=0, row=10)
 
+    mottoCheckerBtn = Button(menuGUI, text='Check Mottos', command=lambda: mottoChecker(menuGUI), width=40)
+    mottoCheckerBtn.grid(column=0, row=15)
+
     editNames = Button(menuGUI, text='Edit Names', command=lambda: editNameGUI(menuGUI), width=40)
     editNames.grid(column=0, row=20)
 
@@ -211,6 +214,25 @@ def start():
     # gitPull()
     onlineMain()
     onlineGUI()
+
+def mottoChecker(root):
+    global nameList, motto
+    readFile()
+    motto = []
+    for i in range(0, len(nameList)):
+        response = requests.get(f"https://www.habbo.com/api/public/users?name={nameList[i]}")
+        response = response.json()
+        # print(f"{nameList[i]}\n{response.get('motto')}")
+        motto.append(f"{nameList[i]}: {response.get('motto')}")
+        print(motto[i])
+    root.destroy()
+    root = Tk()
+    root.title("MI Login Checker")
+    frame = Frame(root, padding=10)
+    frame.grid()
+    for i in range(0,len(nameList)):
+        Label(frame, text=(motto[i])).grid(column=0, row=i)
+    root.mainloop()
 
 # editNameGUI()  # Used when debugging this menu
 # start()  # Old, bypasses menu and goes straight to 'Login Checker'
