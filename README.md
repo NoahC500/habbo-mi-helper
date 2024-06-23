@@ -2,6 +2,9 @@
 
 ## Intro
 
+### Operation Cleanup
+In this branch will be a full restructuring of the code to make it less spaghetti like
+
 This is a script I've created to aid me in my role as Director General of Military Intelligence at [HabboUK](https://habbouk.com/).
 
 Currently, it includes:
