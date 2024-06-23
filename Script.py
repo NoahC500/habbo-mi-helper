@@ -192,6 +192,12 @@ def getImages():
         image = Image.open(response)
         imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]} forward.png"
         image.save(imgPath, format="PNG")
+    for i in range(0,len(nameList)):
+        response = requests.get(f"https://www.habbo.com/habbo-imaging/avatarimage?user={nameList[i]}&action=crr=6&direction=&head_direction=2&gesture=sml&size=s&img_format=gif")
+        response = io.BytesIO(response.content)
+        image = Image.open(response)
+        imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]} classic.png"
+        image.save(imgPath, format="GIF")
 
 def openImagesDir():
     subprocess.Popen(['dolphin', f"{home}/.Habbo-Name-List/images/"])
@@ -209,6 +215,9 @@ def refresh(root):
     onlineMain()
     root.destroy()
     onlineGUI(root)
+
+def refreshMotto(root):
+    mottoChecker(root)
 
 def start():
     # gitPull()
@@ -232,6 +241,10 @@ def mottoChecker(root):
     frame.grid()
     for i in range(0,len(nameList)):
         Label(frame, text=(motto[i])).grid(column=0, row=i)
+    menuButton = Button(root, text="Menu", command=lambda: online2main(root), width=40)
+    menuButton.grid(column=0, row=len(nameList)+1)
+    refreshButton = Button(root, text="Refresh", command=lambda: refreshMotto(root), width=40)
+    refreshButton.grid(column=0, row=2)
     root.mainloop()
 
 # editNameGUI()  # Used when debugging this menu
