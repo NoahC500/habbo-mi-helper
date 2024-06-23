@@ -20,12 +20,16 @@ def mainMenu():  # Initial Menu
     menuGUI.title("MI Login Checker")
     frame = Frame(menuGUI, padding=10)
     frame.grid()
+    menuGUI.resizable(width=False, height=False)
 
     loginChecker = Button(menuGUI, text='Login Checker', command=lambda: startLoginChecker(menuGUI, loginChecker), width=40)
     loginChecker.grid(column=0, row=0)
 
     checkDQ = Button(menuGUI, text='Quota Checker', command=lambda: openDQ(), width=40)
     checkDQ.grid(column=0, row=10)
+
+    mottoCheckerBtn = Button(menuGUI, text='Check Mottos', command=lambda: mottoChecker(menuGUI), width=40)
+    mottoCheckerBtn.grid(column=0, row=15)
 
     editNames = Button(menuGUI, text='Edit Names', command=lambda: editNameGUI(menuGUI), width=40)
     editNames.grid(column=0, row=20)
@@ -107,6 +111,7 @@ def onlineGUI(root):  # GUI for 'Login Checker'
     tryKill(root)
     root = Tk()
     root.title("MI Login Checker")
+    root.resizable(width=False, height=False)
     frame = Frame(root, padding=10)
     frame.grid()
     for i in range(0, len(nameList)):
@@ -125,6 +130,7 @@ def editNameGUI(root):
     readFile()
     editRoot = Tk()
     editRoot.title("MI Login Checker")
+    editRoot.resizable(width=False, height=False)
     frame = Frame(editRoot, padding=10)
     frame.grid()
     text = Text(editRoot, width=40, height=10)
@@ -189,6 +195,12 @@ def getImages():
         image = Image.open(response)
         imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]} forward.png"
         image.save(imgPath, format="PNG")
+    for i in range(0,len(nameList)):
+        response = requests.get(f"https://www.habbo.com/habbo-imaging/avatarimage?user={nameList[i]}&action=crr=6&direction=&head_direction=2&gesture=sml&size=s&img_format=gif")
+        response = io.BytesIO(response.content)
+        image = Image.open(response)
+        imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]} classic.png"
+        image.save(imgPath, format="GIF")
 
 def openImagesDir():
     subprocess.Popen(['dolphin', f"{home}/.Habbo-Name-List/images/"])
@@ -207,10 +219,37 @@ def refresh(root):
     root.destroy()
     onlineGUI(root)
 
+def refreshMotto(root):
+    mottoChecker(root)
+
 def start():
     # gitPull()
     onlineMain()
     onlineGUI()
+
+def mottoChecker(root):
+    global nameList, motto
+    readFile()
+    motto = []
+    for i in range(0, len(nameList)):
+        response = requests.get(f"https://www.habbo.com/api/public/users?name={nameList[i]}")
+        response = response.json()
+        # print(f"{nameList[i]}\n{response.get('motto')}")
+        motto.append(f"{nameList[i]}: {response.get('motto')}")
+        print(motto[i])
+    root.destroy()
+    root = Tk()
+    root.title("MI Login Checker")
+    root.resizable(width=False, height=False)
+    frame = Frame(root, padding=10)
+    frame.grid()
+    for i in range(0,len(nameList)):
+        Label(frame, text=(motto[i])).grid(column=0, row=i)
+    menuButton = Button(root, text="Menu", command=lambda: online2main(root), width=40)
+    menuButton.grid(column=0, row=len(nameList)+1)
+    refreshButton = Button(root, text="Refresh", command=lambda: refreshMotto(root), width=40)
+    refreshButton.grid(column=0, row=2)
+    root.mainloop()
 
 # editNameGUI()  # Used when debugging this menu
 # start()  # Old, bypasses menu and goes straight to 'Login Checker'
