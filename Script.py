@@ -20,6 +20,7 @@ def mainMenu():  # Initial Menu
     menuGUI.title("MI Login Checker")
     frame = Frame(menuGUI, padding=10)
     frame.grid()
+    menuGUI.resizable(width=False, height=False)
 
     loginChecker = Button(menuGUI, text='Login Checker', command=lambda: startLoginChecker(menuGUI, loginChecker), width=40)
     loginChecker.grid(column=0, row=0)
@@ -110,6 +111,7 @@ def onlineGUI(root):  # GUI for 'Login Checker'
     tryKill(root)
     root = Tk()
     root.title("MI Login Checker")
+    root.resizable(width=False, height=False)
     frame = Frame(root, padding=10)
     frame.grid()
     for i in range(0, len(nameList)):
@@ -128,6 +130,7 @@ def editNameGUI(root):
     readFile()
     editRoot = Tk()
     editRoot.title("MI Login Checker")
+    editRoot.resizable(width=False, height=False)
     frame = Frame(editRoot, padding=10)
     frame.grid()
     text = Text(editRoot, width=40, height=10)
@@ -237,6 +240,7 @@ def mottoChecker(root):
     root.destroy()
     root = Tk()
     root.title("MI Login Checker")
+    root.resizable(width=False, height=False)
     frame = Frame(root, padding=10)
     frame.grid()
     for i in range(0,len(nameList)):
