@@ -10,60 +10,45 @@ from PIL import Image
 import io
 import subprocess
 
-# os.system("nano /home/noah/.Habbo-Name-List/habbo-eedb-names.txt") # Only for testing
-
 home = os.path.expanduser(os.getenv('HOME'))
 
 
-def mainMenu():  # Initial Menu
+def mainMenu():  # Main Menu GUI
     menuGUI = Tk()
     menuGUI.title("MI Login Checker")
     frame = Frame(menuGUI, padding=10)
     frame.grid()
     menuGUI.resizable(width=False, height=False)
 
-    loginChecker = Button(menuGUI, text='Login Checker', command=lambda: startLoginChecker(menuGUI, loginChecker), width=40)
-    loginChecker.grid(column=0, row=0)
+    loginCheckerBtn = Button(menuGUI, text='Login Checker', command=lambda: loginChecker(menuGUI), width=40)
+    loginCheckerBtn.grid(column=0, row=0)
 
-    checkDQ = Button(menuGUI, text='Quota Checker', command=lambda: openDQ(), width=40)
-    checkDQ.grid(column=0, row=10)
+    checkDQBtn = Button(menuGUI, text='Quota Checker', command=lambda: openDQ(), width=40)
+    checkDQBtn.grid(column=0, row=1)
 
     mottoCheckerBtn = Button(menuGUI, text='Check Mottos', command=lambda: mottoChecker(menuGUI), width=40)
-    mottoCheckerBtn.grid(column=0, row=15)
+    mottoCheckerBtn.grid(column=0, row=2)
 
-    editNames = Button(menuGUI, text='Edit Names', command=lambda: editNameGUI(menuGUI), width=40)
-    editNames.grid(column=0, row=20)
+    editNamesBtn = Button(menuGUI, text='Edit Names', command=lambda: editNameGUI(menuGUI), width=40)
+    editNamesBtn.grid(column=0, row=3)
 
-    getImagesButton = Button(menuGUI, text='Get Images', command=lambda: getImages(), width=40)
-    getImagesButton.grid(column=0, row=30)
+    getImagesBtn = Button(menuGUI, text='Get Images', command=lambda: getImages(), width=40)
+    getImagesBtn.grid(column=0, row=4)
 
-    openImagesDirButton = Button(menuGUI, text='Open Image Directory', command=lambda: openImagesDir(), width=40)
-    openImagesDirButton.grid(column=0, row=40)
+    imagesDirBtn = Button(menuGUI, text='Open Image Directory', command=lambda: openImagesDir(), width=40)
+    imagesDirBtn.grid(column=0, row=5)
 
-    exitButton = Button(menuGUI, text='Exit', command=lambda: menuGUI.destroy(), width=40)
-    exitButton.grid(column=0, row=99)
+    exitBtn = Button(menuGUI, text='Exit', command=lambda: menuGUI.destroy(), width=40)
+    exitBtn.grid(column=0, row=6)
 
     menuGUI.mainloop()
 
-def calcDelta(fromDate):  # Calculates time since last online
-    fromDate = datetime.strptime(fromDate, '%Y-%m-%dT%H:%M:%S')
-    delta = datetime.now() - fromDate
-    days = delta.days
-    hours = (int(delta.total_seconds()) // 3600) % 24
-    return days, hours
-
-def readFile():  # Gets names from file, splitting into an array
+def loginChecker(root):  # Checks Last Login Time
     global nameList
-    nameList = open(f"{home}/.Habbo-Name-List/habbo-eedb-names.txt")
-    nameList = (nameList.read()).split()
-
-def onlineMain():  # 'Login Checker'
-    global onlineStatus, lastAccessTime, nameList, string
-    string = []
+    lastLoginStr = []
     onlineStatus = []
     lastAccessTime = []
     profileVisible = []
-    response = ""
 
     readFile()
 
@@ -74,40 +59,10 @@ def onlineMain():  # 'Login Checker'
         onlineStatus.append(response.get('online'))
         lastAccessTime.append(response.get('lastAccessTime'))
 
-
-    for i in range(0, len(nameList)):
-        # print(f"{nameList[i]}: {onlineStatus[i]} {profileVisible[i]}")  # for testing only
-        if onlineStatus[i] == True:
-            string.append(f"{nameList[i]} is online")
-
-        elif profileVisible[i] == 'false':
-            string.append(f"{nameList[i]}'s profile and online status are private")
-
-        elif lastAccessTime[i] == None:
-            string.append(f"{nameList[i]}'s online status is private")
-
-        elif onlineStatus[i] != 'true' and lastAccessTime[i] != None:
-            lastLoginStr(i)
-
-def lastLoginStr(i):  # Function to determine applicable string to show on 'Login Checker' page
-    global onlineStatus, lastAccessTime, nameList, string
-    # print(f"{lastAccessTime[i]}\n{lastAccessTime}\n")  # Only for testing
-    temp = str(lastAccessTime[i])
-    # print(f"lastAccessTime is {lastAccessTime}")  # Only for testing
-    days, hours = calcDelta(temp.split('.')[0])
-    if days == 1 and hours == 1:
-        string.append(f"{nameList[i]} last logged in {days} day and {hours} hour ago")
-    elif hours == 1:
-        string.append(f"{nameList[i]} last logged in {days} days and {hours} hour ago")
-    elif days == 1:
-        string.append(f"{nameList[i]} last logged in {days} day and {hours} hours ago")
-    else:
-        string.append(f"{nameList[i]} last logged in {days} days and {hours} hours ago")
-    if days > 3:
-        string[i] = f"{string[i]} DUE CHECKUP"
+        lastLoginStrFunc(i, lastLoginStr, profileVisible, onlineStatus, lastAccessTime)
 
 def onlineGUI(root):  # GUI for 'Login Checker'
-    global onlineStatus, lastAccessTime, nameList, string
+    global nameList
     tryKill(root)
     root = Tk()
     root.title("MI Login Checker")
@@ -123,6 +78,45 @@ def onlineGUI(root):  # GUI for 'Login Checker'
     refreshButton = Button(root, text="Refresh", command=lambda: refresh(root), width=40)
     refreshButton.grid(column=0, row=2)
     root.mainloop()
+
+def readFile():  # Gets names from file, splitting into an array
+    global nameList
+    nameList = open(f"{home}/.Habbo-Name-List/habbo-eedb-names.txt")
+    nameList = (nameList.read()).split()
+
+def lastLoginStrFunc(i, lastLoginStr, profileVisible, onlineStatus, lastAccessTime):  # Function to determine correct string to show on 'Login Checker' page
+    global nameList
+    for i in range(0, len(nameList)):
+        if onlineStatus[i] == True:
+            lastLoginStr.append(f"{nameList[i]} is online")
+
+        elif profileVisible[i] == 'false':
+            lastLoginStr.append(f"{nameList[i]}'s profile and online status are private")
+
+        elif lastAccessTime[i] == None:
+            lastLoginStr.append(f"{nameList[i]}'s online status is private")
+
+        elif onlineStatus[i] != 'true' and lastAccessTime[i] != None:
+            lastLoginStrFunc(i, lastLoginStr)
+        else:
+            days, hours = calcTimeDelta(str(lastAccessTime[i]).split('.')[0])
+            if days == 1 and hours == 1:
+                lastLoginStr.append(f"{nameList[i]} last logged in {days} day and {hours} hour ago")
+            elif hours == 1:
+                lastLoginStr.append(f"{nameList[i]} last logged in {days} days and {hours} hour ago")
+            elif days == 1:
+                lastLoginStr.append(f"{nameList[i]} last logged in {days} day and {hours} hours ago")
+            else:
+                lastLoginStr.append(f"{nameList[i]} last logged in {days} days and {hours} hours ago")
+            if days > 3:
+                lastLoginStr[i] = f"{lastLoginStr[i]} DUE CHECKUP"
+
+def calcTimeDelta(fromDate):  # Calculates time since last online
+    fromDate = datetime.strptime(fromDate, '%Y-%m-%dT%H:%M:%S')
+    delta = datetime.now() - fromDate
+    days = delta.days
+    hours = (int(delta.total_seconds()) // 3600) % 24
+    return days, hours
 
 def editNameGUI(root):
     global nameList
@@ -205,11 +199,6 @@ def getImages():
 def openImagesDir():
     subprocess.Popen(['dolphin', f"{home}/.Habbo-Name-List/images/"])
 
-def startLoginChecker(root, loadingText):
-    loadingText.config(text="Loading...")
-    onlineMain()
-    onlineGUI(root)
-
 def gitPull():  # Currently disabled by default, kinda broken, will add to enable syncing list between computers
     os.system(f"cd {home}/.Habbo-Name-List/script && git pull")
     os.system(f"cd {home}/.Habbo-Name-List/ && git pull")
@@ -251,6 +240,4 @@ def mottoChecker(root):
     refreshButton.grid(column=0, row=2)
     root.mainloop()
 
-# editNameGUI()  # Used when debugging this menu
-# start()  # Old, bypasses menu and goes straight to 'Login Checker'
 mainMenu()
