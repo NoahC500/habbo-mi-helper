@@ -2,18 +2,24 @@
 import requests
 import json
 from datetime import datetime
-import os
+import os # For getting HOME variable
 from tkinter import *
 from tkinter.ttk import *
 import webbrowser
 from PIL import Image
 import io
 import subprocess
+import sys # For determining OS
 
 # os.system("nano /home/noah/.Habbo-Name-List/habbo-eedb-names.txt") # Only for testing
 
 home = os.path.expanduser(os.getenv('HOME'))
-
+if sys.platform == 'linux':
+    openCommand = "xdg-open"
+elif sys.platform == 'win32':
+    openCommand = "start"
+elif sys.platform == 'darwin':
+    openCommand = "open"
 
 def mainMenu():  # Initial Menu
     menuGUI = Tk()
@@ -203,7 +209,8 @@ def getImages():
         image.save(imgPath, format="GIF")
 
 def openImagesDir():
-    subprocess.Popen(['dolphin', f"{home}/.Habbo-Name-List/images/"])
+    global openCommand
+    subprocess.Popen([openCommand, f"{home}/.Habbo-Name-List/images/"])
 
 def startLoginChecker(root, loadingText):
     loadingText.config(text="Loading...")
