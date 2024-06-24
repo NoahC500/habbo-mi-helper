@@ -14,42 +14,58 @@ import sys # For determining OS
 home = os.path.expanduser(os.getenv('HOME'))
 if sys.platform == 'linux':
     openCommand = "xdg-open"
+    settingsFile = f"{home}/.config/MI Helper Script/MI Helper Script"
 elif sys.platform == 'win32':
     openCommand = "start"
+    settingsFile = f"{home}/AppData/Local/MI Helper Script/MI Helper Script.cfg"
 elif sys.platform == 'darwin':
     openCommand = "open"
+    settingsFile = f"{home}/Library/Application Support/MI Helper Script/MI Helper Script.cfg"
+
+def readFile(inFile):  # Gets names from file, then splits into an array
+    outFile = ((open(inFile)).read()).splitlines()
+    return outFile
+
+settings = readFile(settingsFile)
+
+imagesDir = settings[1]
+if imagesDir[-1] != '/':
+    imagesDir += '/'
 
 def mainMenu(root):  # Main Menu GUI
     if root != "":
         root.destroy()
-    menuGUI = Tk()
-    menuGUI.title("MI Login Checker")
-    frame = Frame(menuGUI, padding=10)
+    root = Tk()
+    root.title("MI Login Checker")
+    frame = Frame(root, padding=10)
     frame.grid()
-    menuGUI.resizable(width=False, height=False)
+    root.resizable(width=False, height=False)
 
-    loginCheckerBtn = Button(menuGUI, text='Login Checker', command=lambda: loginChecker(menuGUI), width=40)
+    loginCheckerBtn = Button(root, text='Login Checker', command=lambda: loginChecker(root), width=40)
     loginCheckerBtn.grid(column=0, row=0)
 
-    checkDQBtn = Button(menuGUI, text='Quota Checker', command=lambda: openDQ(), width=40)
+    checkDQBtn = Button(root, text='Quota Checker', command=lambda: openDQ(), width=40)
     checkDQBtn.grid(column=0, row=1)
 
-    mottoCheckerBtn = Button(menuGUI, text='Check Mottos', command=lambda: mottoChecker(menuGUI), width=40)
+    mottoCheckerBtn = Button(root, text='Check Mottos', command=lambda: mottoChecker(root), width=40)
     mottoCheckerBtn.grid(column=0, row=2)
 
-    editNamesBtn = Button(menuGUI, text='Edit Names', command=lambda: editNamesGUI(menuGUI), width=40)
+    editNamesBtn = Button(root, text='Edit Names', command=lambda: editNamesGUI(root), width=40)
     editNamesBtn.grid(column=0, row=3)
 
-    getImagesBtn = Button(menuGUI, text='Get Images', command=lambda: getImages(), width=40)
+    getImagesBtn = Button(root, text='Get Images', command=lambda: getImages(), width=40)
     getImagesBtn.grid(column=0, row=4)
 
-    imagesDirBtn = Button(menuGUI, text='Open Image Directory', command=lambda: openImagesDir(), width=40)
+    imagesDirBtn = Button(root, text='Open Image Directory', command=lambda: openImagesDir(), width=40)
     imagesDirBtn.grid(column=0, row=5)
 
-    exitBtn = Button(menuGUI, text='Exit', command=lambda: menuGUI.destroy(), width=40)
-    exitBtn.grid(column=0, row=6)
+    settingsBtn = Button(root, text='Settings', command=lambda: settingsGUI(root), width=40)
+    settingsBtn.grid(column=0, row=6)
 
-    menuGUI.mainloop()
+    exitBtn = Button(root, text='Exit', command=lambda: root.destroy(), width=40)
+    exitBtn.grid(column=0, row=7)
+
+    root.mainloop()
 
 def loginChecker(root):  # Checks Last Login Time
     lastLoginStr = []
@@ -90,10 +106,6 @@ def loginCheckerGUI(root, lastLoginStr, nameList):  # GUI for 'Login Checker'
 
     root.mainloop()
 
-def readFile():  # Gets names from file, then splits into an array
-    nameList = ((open(f"{home}/.Habbo-Name-List/habbo-eedb-names.txt")).read()).split()
-    return nameList
-
 def lastLoginStrFunc(lastLoginStr, profileVisible, onlineStatus, lastAccessTime, nameList):  # Function to determine correct string to show on 'Login Checker' page
     for i in range(0,len(nameList)):
         if onlineStatus[i] == True:
@@ -127,8 +139,9 @@ def calcTimeDelta(fromDate):  # Calculates time since last online
     return days, hours
 
 def editNamesGUI(root):
+    global namesFile
     root.destroy()
-    nameList = readFile()
+    nameList = readFile(namesFile)
     root = Tk()
     root.title("MI Login Checker")
     root.resizable(width=False, height=False)
@@ -162,31 +175,27 @@ def openDQ():
 def getImages():
     nameList = readFile()
 
-    subprocess.run(f"rm {home}/.Habbo-Name-List/images/*", shell=True) # Deletes all images currently in folder
+    subprocess.run(f"rm {imagesDir}*", shell=True) # Deletes all images currently in folder
 
     for i in range(0,len(nameList)): # Habbo waving
-        imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]}.gif"
+        imgPath = f"{imagesDir}{nameList[i]}.gif"
         (Image.open(io.BytesIO((requests.get(f"https://www.habbo.com/habbo-imaging/avatarimage?user={nameList[i]}&action=wav&direction=2&head_direction=2&gesture=sml&size=m&img_format=gif")).content))).save(imgPath, format="GIF")
 
     for i in range(0,len(nameList)): # Habbo facing forward
-        imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]} forward.png"
+        imgPath = f"{imagesDir}{nameList[i]} forward.png"
         (Image.open(io.BytesIO((requests.get(f"https://www.habbo.com/habbo-imaging/avatarimage?user={nameList[i]}&direction=3&head_direction=3&gesture=sml&drk=42&size=l")).content))).save(imgPath, format="PNG")
 
     for i in range(0,len(nameList)): # Old-style Habbo w/ Coffee
-        imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]} classic & coffee.gif"
+        imgPath = f"{imagesDir}{nameList[i]} classic & coffee.gif"
         (Image.open(io.BytesIO((requests.get(f"https://www.habbo.com/habbo-imaging/avatarimage?user={nameList[i]}&action=crr=6&direction=&head_direction=2&gesture=sml&size=s&img_format=gif")).content))).save(imgPath, format="GIF")
 
     for i in range(0,len(nameList)): # Old-style Habbo w/ Coffee
-        imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]} classic.gif"
+        imgPath = f"{imagesDir}{nameList[i]} classic.gif"
         (Image.open(io.BytesIO((requests.get(f"https://www.habbo.com/habbo-imaging/avatarimage?user={nameList[i]}&direction=&head_direction=2&gesture=sml&size=s&img_format=gif")).content))).save(imgPath, format="GIF")
 
 def openImagesDir():
-    global openCommand
-    subprocess.run([openCommand, f"{home}/.Habbo-Name-List/images/"])
-
-def gitPull():  # Currently disabled by default, kinda broken, will add to enable syncing list between computers
-    os.system(f"cd {home}/.Habbo-Name-List/script && git pull")
-    os.system(f"cd {home}/.Habbo-Name-List/ && git pull")
+    global openCommand, imagesDir
+    subprocess.run([openCommand, imagesDir])
 
 def mottoChecker(root):
     nameList = readFile()
@@ -209,10 +218,38 @@ def mottoChecker(root):
     menuButton = Button(root, text="Menu", command=lambda: mainMenu(root), width=40)
     menuButton.grid(column=0, row=len(nameList)+1)
 
-    refreshButton = Button(root, text="Refresh", command=lambda: mottoChecker(root), width=40)
+    refreshButton = Button(root, text="Refresh", command=lambda: mottoChecker(root, width=40))
     refreshButton.grid(column=0, row=2)
 
     root.mainloop()
+
+def settingsGUI(root):
+    global settingsFile
+    settings = readFile(settingsFile)
+    root.destroy()
+    root = Tk()
+    root.title("MI Login Checker")
+    root.resizable(width=False, height=False)
+    frame = Frame(root, padding=10)
+    frame.grid()
+
+    settingsInput = Text(root, width=40, height=10)
+    settingsInput.grid(column=0, row=0)
+    for i in range(0,len(settings)):
+        settingsInput.insert(f"{i+1}.0", f"{settings[i]}\n")
+
+    cancelBtn = Button(root, text="Cancel", command=lambda: mainMenu(root))
+    cancelBtn.grid(column=0, row=1)
+
+    submitBtn = Button(root, text="Submit", command=lambda: submitSettings(root, settingsInput))
+    submitBtn.grid(column=0, row=2)
+
+def submitSettings(root, settingsInput):
+    global settingsFile
+    settings = open(settingsFile, 'w')
+    settings.write(settingsInput.get(1.0, END))
+    settings.close()
+    mainMenu(root)
 
 root = "" # Means there need not be a kill before mainMenu() function
 mainMenu(root)
