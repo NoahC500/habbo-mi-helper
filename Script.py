@@ -2,16 +2,22 @@
 import requests
 import json
 from datetime import datetime
-import os
+import os # For getting HOME variable
 from tkinter import *
 from tkinter.ttk import *
 import webbrowser
 from PIL import Image
 import io
 import subprocess
+import sys # For determining OS
 
 home = os.path.expanduser(os.getenv('HOME'))
-
+if sys.platform == 'linux':
+    openCommand = "xdg-open"
+elif sys.platform == 'win32':
+    openCommand = "start"
+elif sys.platform == 'darwin':
+    openCommand = "open"
 
 def mainMenu():  # Main Menu GUI
     menuGUI = Tk()
@@ -197,7 +203,8 @@ def getImages():
         image.save(imgPath, format="GIF")
 
 def openImagesDir():
-    subprocess.Popen(['dolphin', f"{home}/.Habbo-Name-List/images/"])
+    global openCommand
+    subprocess.Popen([openCommand, f"{home}/.Habbo-Name-List/images/"])
 
 def gitPull():  # Currently disabled by default, kinda broken, will add to enable syncing list between computers
     os.system(f"cd {home}/.Habbo-Name-List/script && git pull")
