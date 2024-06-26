@@ -14,19 +14,37 @@ import sys # For determining OS
 home = os.path.expanduser(os.getenv('HOME'))
 if sys.platform == 'linux':
     openCommand = "xdg-open"
-    settingsFile = f"{home}/.config/MI Helper Script/MI Helper Script"
+    settingsDir = f"{home}/.config/MI Helper Script"
 elif sys.platform == 'win32':
     openCommand = "start"
-    settingsFile = f"{home}/AppData/Local/MI Helper Script/MI Helper Script.cfg"
+    settingsDir = f"{home}/AppData/Local/MI Helper Script"
 elif sys.platform == 'darwin':
     openCommand = "open"
-    settingsFile = f"{home}/Library/Application Support/MI Helper Script/MI Helper Script.cfg"
+    settingsDir = f"{home}/Library/Application Support/MI Helper Script"
+settingsFile = f"{settingsDir}/MI Helper Script.cfg"
 
-def readFile(inFile):  # Gets names from file, then splits into an array
+def readFile(inFile):  # Splits a file into an array of lines
     outFile = ((open(inFile)).read()).splitlines()
     return outFile
 
-settings = readFile(settingsFile)
+def createFile(inFile):
+    try:
+        toCreate = open(f"\'{inFile}\'", 'w')
+        toCreate.write("")
+        toCreate.close()
+    except:
+        print("Failed creating")
+
+try:
+    settings = readFile(settingsFile)
+except:
+    try:
+        createFile(settingsFile)
+        settings = readFile(settingsFile)
+    except:
+        subprocess.run(f"mkdir {settingsDir}", shell=True)
+        createFile(settingsFile)
+        settings = readFile(settingsFile)
 
 imagesDir = settings[1]
 if imagesDir[-1] != '/':
