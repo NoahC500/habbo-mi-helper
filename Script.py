@@ -9,7 +9,7 @@ import webbrowser
 from PIL import Image
 import io
 import subprocess
-import sys # For determining OS
+import sys # For determining OS, etc.
 
 home = os.path.expanduser(os.getenv('HOME'))
 if sys.platform == 'linux':
@@ -27,22 +27,45 @@ def readFile(inFile):  # Splits a file into an array of lines
     outFile = ((open(inFile)).read()).splitlines()
     return outFile
 
-def createFile(inFile):
+def createFile(inFile, imagesDir):
     try:
-        toCreate = open(f"\'{inFile}\'", 'w')
-        toCreate.write("")
+        toCreate = open(inFile, 'w')
+        # print("Has opened to create")
+        toCreate.write(f"ImagesDir:\n{imagesDir}")
         toCreate.close()
+        # print("Created file")
     except:
-        print("Failed creating")
+        print("Failed creating file")
+
+def getPath():
+    root = Tk()
+    root.title("MI Login Checker")
+    frame = Frame(root, padding=10)
+    frame.grid()
+    root.resizable(width=False, height=False)
+    label = Label(text="Enter path to store images in")
+    label.grid(column=0, row=0)
+    textInput = Text(root, width=40, height=1)
+    textInput.grid(column=0, row=1)
+    submitBtn = Button(root, width=40, text="Submit", command=lambda:[imagesDir=textInput.get(1.0, END), root.destroy])
+    submitBtn.grid(column=0, row=2)
+    root.mainloop()
+    return imagesDir
 
 try:
+    print("Trying to read")
     settings = readFile(settingsFile)
+    print(settings)
 except:
+    print("Reading failed")
     try:
-        createFile(settingsFile)
+        print("Trying to create")
+        imagesDir = getPath()
+        print(imagesDir)
+        createFile(settingsFile, imagesDir)
         settings = readFile(settingsFile)
     except:
-        subprocess.run(f"mkdir {settingsDir}", shell=True)
+        subprocess.run(f"mkdir '{settingsDir}'", shell=True)
         createFile(settingsFile)
         settings = readFile(settingsFile)
 
