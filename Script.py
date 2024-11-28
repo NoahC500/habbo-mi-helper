@@ -34,20 +34,26 @@ def mainMenu(root):  # Main Menu GUI
     checkDQBtn = Button(menuGUI, text='Quota Checker', command=lambda: openDQ(), width=40)
     checkDQBtn.grid(column=0, row=1)
 
-    mottoCheckerBtn = Button(menuGUI, text='Check Mottos', command=lambda: mottoChecker(menuGUI), width=40)
+    mottoCheckerBtn = Button(menuGUI, text='Motto Checker', command=lambda: mottoChecker(menuGUI), width=40)
     mottoCheckerBtn.grid(column=0, row=2)
 
+    mottoCheckerBtn = Button(menuGUI, text='Badge Checker', command=lambda: badgeChecker(menuGUI), width=40)
+    mottoCheckerBtn.grid(column=0, row=3)
+
     editNamesBtn = Button(menuGUI, text='Edit Names', command=lambda: editNamesGUI(menuGUI), width=40)
-    editNamesBtn.grid(column=0, row=3)
+    editNamesBtn.grid(column=0, row=4)
 
     getImagesBtn = Button(menuGUI, text='Get Images', command=lambda: getImages(), width=40)
-    getImagesBtn.grid(column=0, row=4)
+    getImagesBtn.grid(column=0, row=5)
 
     imagesDirBtn = Button(menuGUI, text='Open Image Directory', command=lambda: openImagesDir(), width=40)
-    imagesDirBtn.grid(column=0, row=5)
+    imagesDirBtn.grid(column=0, row=6)
+
+    ecatCommitBtn = Button(menuGUI, text='Commit ECAT Update', command=lambda: ecatCommit(menuGUI), width=40)
+    ecatCommitBtn.grid(column=0, row=7)
 
     exitBtn = Button(menuGUI, text='Exit', command=lambda: menuGUI.destroy(), width=40)
-    exitBtn.grid(column=0, row=6)
+    exitBtn.grid(column=0, row=8)
 
     menuGUI.mainloop()
 
@@ -213,6 +219,99 @@ def mottoChecker(root):
     refreshButton.grid(column=0, row=2)
 
     root.mainloop()
+
+def badgeChecker(root):
+    root.destroy()
+    root = Tk()
+    root.title("MI Login Checker")
+    root.resizable(width=False, height=False)
+    frame = Frame(root, padding=10)
+    frame.grid()
+
+    miAccessBtn = Button(root, text="MI Access ID", command=lambda: badgeCheckerMain(root, 'lr'), width=40)
+    miAccessBtn.grid(column=0, row=0)
+
+    miBtn = Button(root, text="Training ID", command=lambda: badgeCheckerMain(root, 'mi'), width=40)
+    miBtn.grid(column=0, row=1)
+
+    hocBtn = Button(root, text="HoC ID", command=lambda: badgeCheckerMain(root, 'hoc'), width=40)
+    hocBtn.grid(column=0, row=2)
+
+    judiBtn = Button(root, text="Judiciary ID", command=lambda: badgeCheckerMain(root, 'judi'), width=40)
+    judiBtn.grid(column=0, row=3)
+
+    cabBtn = Button(root, text="Cabinet ID", command=lambda: badgeCheckerMain(root, 'cab'), width=40)
+    cabBtn.grid(column=0, row=4)
+
+    menuButton = Button(root, text="Menu", command=lambda: mainMenu(root), width=40)
+    menuButton.grid(column=0, row=5)
+
+
+def badgeCheckerMain(root, badge):
+    global i
+    i = 0
+    if badge == 'lr':
+        data = requests.get("https://www.habbo.com/api/public/groups/g-hhus-1532b1b5605132a130a9bcc48da9ca96/members?pageIndex=0").json()
+    elif badge == 'mi':
+        data = requests.get("https://www.habbo.com/api/public/groups/g-hhus-7fa90a65814f7d7dadcfaa99b74cc46a/members?pageIndex=0").json()
+    elif badge == 'hoc':
+        data = requests.get("https://www.habbo.com/api/public/groups/g-hhus-1ced7dc74a0a5828c6c7a80e2233080c/members?pageIndex=0").json()
+    elif badge == 'judi':
+        data = requests.get("https://www.habbo.com/api/public/groups/g-hhus-16ea38d9abce2bf63fa12d8d41e41f94/members?pageIndex=0").json()
+    elif badge == 'cab':
+        data = requests.get("https://www.habbo.com/api/public/groups/g-hhus-2114ea67eb859501ecd3b3192d66bbf3/members?pageIndex=0").json()
+    drawNameBadge(data, root)
+
+def nextNameBadge(data, root):
+    global i
+    i+=1
+    drawNameBadge(data, root)
+
+def prevNameBadge(data, root):
+    global i
+    i-=1
+    drawNameBadge(data, root)
+
+def drawNameBadge(data, root):
+    global i
+    root.destroy()
+    root = Tk()
+    root.title("MI Login Checker")
+    root.resizable(width=False, height=False)
+    frame = Frame(root, padding=10)
+    frame.grid()
+
+    label = Button(frame, text=f"{data[i].get('name')}: {data[i].get('motto')}", command=lambda: copyUsername(data, root)).grid(column=0, row=0)
+
+    if i < len(data)-1:
+        nextBtn = Button(root, text="-> Next ->", command=lambda: nextNameBadge(data, root), width=40)
+        nextBtn.grid(column=0, row=1)
+    else:
+        nextBtn = Button(root, text="End of List", width=40)
+        nextBtn.grid(column=0, row=1)
+
+    if i != 0:
+        prevBtn = Button(root, text="<- Previous <-", command=lambda: prevNameBadge(data, root), width=40)
+        prevBtn.grid(column=0, row=2)
+    else:
+        prevBtn = Button(root, text="Start of List", width=40)
+        prevBtn.grid(column=0, row=2)
+
+    menuBtn = Button(root, text="Menu", command=lambda: badgeChecker(root), width=40)
+    menuBtn.grid(column=0, row=3)
+
+    root.mainloop()
+
+def copyUsername(data, root):
+    global i
+    root.withdraw()
+    root.clipboard_clear()
+    root.clipboard_append(data[i].get('name'))
+    root.update()
+
+def ecatCommit(root):
+    root.destroy()
+    subprocess.run("python '/home/noah/Start/Files/Habbo/ECAT Updates/Git Script.py'", shell=True, cwd="/home/noah/Start/Files/Habbo/ECAT Updates/")
 
 root = "" # Means there need not be a kill before mainMenu() function
 mainMenu(root)
