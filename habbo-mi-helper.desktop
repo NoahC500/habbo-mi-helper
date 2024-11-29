@@ -1,0 +1,9 @@
+[Desktop Entry]
+Comment=
+Exec=/usr/bin/habbo-mi-helper/habbo-mi-helper.py
+GenericName=
+Icon=/usr/bin/habbo-mi-helper/icon.png
+Name=Habbo MI Helper
+StartupNotify=true
+Terminal=false
+Type=Application

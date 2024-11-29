@@ -11,19 +11,32 @@ import io
 import subprocess
 import sys # For determining OS
 
+appTitle = "Habbo MI Helper"
 home = os.path.expanduser(os.getenv('HOME'))
 if sys.platform == 'linux':
     openCommand = "xdg-open"
+    nameLoc = f"{home}/.config/habbo-mi-helper/names"
+    baseDir = f"{home}/.config/habbo-mi-helper/"
+    rmdirCmd = "rm -rf"
 elif sys.platform == 'win32':
     openCommand = "start"
+    nameLoc = f"{home}/Documents/habbo-mi-helper/names"
+    baseDir = f"{home}/Documents/habbo-mi-helper/"
+    rmdirCmd = "rmdir"
 elif sys.platform == 'darwin':
     openCommand = "open"
+    nameLoc = f"{home}/.config/habbo-mi-helper/names"
+    baseDir = f"{home}/.config/habbo-mi-helper/"
+    rmdirCmd = "rm -rf"
+else:
+    sys.exit("Can't ID OS")
+baseImgDir = f"{home}/Pictures/habbo-mi-helper/"
 
 def mainMenu(root):  # Main Menu GUI
     if root != "":
         root.destroy()
     menuGUI = Tk()
-    menuGUI.title("MI Login Checker")
+    menuGUI.title(appTitle)
     frame = Frame(menuGUI, padding=10)
     frame.grid()
     menuGUI.resizable(width=False, height=False)
@@ -43,7 +56,7 @@ def mainMenu(root):  # Main Menu GUI
     editNamesBtn = Button(menuGUI, text='Edit Names', command=lambda: editNamesGUI(menuGUI), width=40)
     editNamesBtn.grid(column=0, row=4)
 
-    getImagesBtn = Button(menuGUI, text='Get Images', command=lambda: getImages(), width=40)
+    getImagesBtn = Button(menuGUI, text='Get Images', command=lambda: getImages(getImagesBtn), width=40)
     getImagesBtn.grid(column=0, row=5)
 
     imagesDirBtn = Button(menuGUI, text='Open Image Directory', command=lambda: openImagesDir(), width=40)
@@ -80,7 +93,7 @@ def loginChecker(root):  # Checks Last Login Time
 def loginCheckerGUI(root, lastLoginStr, nameList):  # GUI for 'Login Checker'
     root.destroy()
     root = Tk()
-    root.title("MI Login Checker")
+    root.title(appTitle)
     root.resizable(width=False, height=False)
     frame = Frame(root, padding=10)
     frame.grid()
@@ -97,7 +110,12 @@ def loginCheckerGUI(root, lastLoginStr, nameList):  # GUI for 'Login Checker'
     root.mainloop()
 
 def readFile():  # Gets names from file, then splits into an array
-    nameList = ((open(f"{home}/.Habbo-Name-List/habbo-eedb-names.txt")).read()).split()
+    for i in range(0,2):
+        try:
+            nameList = ((open(nameLoc)).read()).split()
+        except:
+            os.system(f"mkdir {baseDir}")
+            os.system(f"echo 'NoahC500' > {nameLoc}")
     return nameList
 
 def lastLoginStrFunc(lastLoginStr, profileVisible, onlineStatus, lastAccessTime, nameList):  # Function to determine correct string to show on 'Login Checker' page
@@ -136,7 +154,7 @@ def editNamesGUI(root):
     root.destroy()
     nameList = readFile()
     root = Tk()
-    root.title("MI Login Checker")
+    root.title(appTitle)
     root.resizable(width=False, height=False)
     frame = Frame(root, padding=10)
     frame.grid()
@@ -155,7 +173,7 @@ def editNamesGUI(root):
     root.mainloop()
 
 def saveNames(root, namesInput):
-    nameList = open(f"{home}/.Habbo-Name-List/habbo-eedb-names.txt", 'w')
+    nameList = open(nameLoc, 'w')
     nameList.write(namesInput.get(1.0, END))
     nameList.close()
     mainMenu(root)
@@ -165,32 +183,33 @@ def openDQ():
     for i in range(0, len(nameList)):
         webbrowser.open(f"https://habbouk.com/dq/stats/{nameList[i]}")
 
-def getImages():
+def getImages(getImagesBtn):
+    getImagesBtn.text = "Loading..."
     nameList = readFile()
-
-    subprocess.run(f"rm {home}/.Habbo-Name-List/images/*", shell=True) # Deletes all images currently in folder
+    subprocess.run(f"{rmdirCmd} {baseImgDir}", shell=True)
+    subprocess.run(f"mkdir {baseImgDir}", shell=True)
 
     for i in range(0,len(nameList)): # Habbo waving
-        imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]}.gif"
+        imgPath = f"{baseImgDir}{nameList[i]}.gif"
         (Image.open(io.BytesIO((requests.get(f"https://www.habbo.com/habbo-imaging/avatarimage?user={nameList[i]}&action=wav&direction=2&head_direction=2&gesture=sml&size=m&img_format=gif")).content))).save(imgPath, format="GIF")
 
     for i in range(0,len(nameList)): # Habbo facing forward
-        imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]} forward.png"
+        imgPath = f"{baseImgDir}{nameList[i]} forward.png"
         (Image.open(io.BytesIO((requests.get(f"https://www.habbo.com/habbo-imaging/avatarimage?user={nameList[i]}&direction=3&head_direction=3&gesture=sml&drk=42&size=l")).content))).save(imgPath, format="PNG")
 
     for i in range(0,len(nameList)): # Old-style Habbo w/ Coffee
-        imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]} classic & coffee.gif"
+        imgPath = f"{baseImgDir}{nameList[i]} classic & coffee.gif"
         (Image.open(io.BytesIO((requests.get(f"https://www.habbo.com/habbo-imaging/avatarimage?user={nameList[i]}&action=crr=6&direction=&head_direction=2&gesture=sml&size=s&img_format=gif")).content))).save(imgPath, format="GIF")
 
     for i in range(0,len(nameList)): # Old-style Habbo w/ Coffee
-        imgPath = f"{home}/.Habbo-Name-List/images/{nameList[i]} classic.gif"
+        imgPath = f"{baseImgDir}{nameList[i]} classic.gif"
         (Image.open(io.BytesIO((requests.get(f"https://www.habbo.com/habbo-imaging/avatarimage?user={nameList[i]}&direction=&head_direction=2&gesture=sml&size=s&img_format=gif")).content))).save(imgPath, format="GIF")
 
 def openImagesDir():
     global openCommand
-    subprocess.run([openCommand, f"{home}/.Habbo-Name-List/images/"])
+    subprocess.run([openCommand, f"{baseImgDir}"])
 
-def gitPull():  # Currently disabled by default, kinda broken, will add to enable syncing list between computers
+def gitPull():  # Currently disabled by default, ~~kinda~~ very broken :P, will add to enable syncing list between computers; this will be toggleable
     os.system(f"cd {home}/.Habbo-Name-List/script && git pull")
     os.system(f"cd {home}/.Habbo-Name-List/ && git pull")
 
@@ -204,7 +223,7 @@ def mottoChecker(root):
 
     root.destroy()
     root = Tk()
-    root.title("MI Login Checker")
+    root.title(appTitle)
     root.resizable(width=False, height=False)
     frame = Frame(root, padding=10)
     frame.grid()
@@ -223,7 +242,7 @@ def mottoChecker(root):
 def badgeChecker(root):
     root.destroy()
     root = Tk()
-    root.title("MI Login Checker")
+    root.title(appTitle)
     root.resizable(width=False, height=False)
     frame = Frame(root, padding=10)
     frame.grid()
@@ -276,7 +295,7 @@ def drawNameBadge(data, root):
     global i
     root.destroy()
     root = Tk()
-    root.title("MI Login Checker")
+    root.title(appTitle)
     root.resizable(width=False, height=False)
     frame = Frame(root, padding=10)
     frame.grid()
@@ -303,6 +322,7 @@ def drawNameBadge(data, root):
     root.mainloop()
 
 def copyUsername(data, root):
+#   To copy usernames on the badge screen, currently non-functional
     global i
     root.withdraw()
     root.clipboard_clear()
@@ -311,7 +331,7 @@ def copyUsername(data, root):
 
 def ecatCommit(root):
     root.destroy()
-    subprocess.run("python '/home/noah/Start/Files/Habbo/ECAT Updates/Git Script.py'", shell=True, cwd="/home/noah/Start/Files/Habbo/ECAT Updates/")
+    subprocess.run("python '/pmt/Files/Habbo/ECAT Updates/Git Script.py'", shell=True, cwd="/pmt/Files/Habbo/ECAT Updates/") # This should be replaced with your local script; I use it for committing training script files; a future update will make this editable and toggleable with the GUI
 
 root = "" # Means there need not be a kill before mainMenu() function
 mainMenu(root)
